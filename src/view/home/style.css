@@ -1,0 +1,36 @@
+.home svg{
+    /*fill: #55a532;*/
+    width: 20px;
+    height: 15px;
+}
+.home-type{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+.home-brand{
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    background-color: #ffffff;
+    margin-top: 2px;
+}
+
+.home-brand p{
+    text-align: center;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.home-icon{
+    width: 316px;
+    text-align: center;
+    margin: 10px auto;
+}
+
+.home-brand i{
+    font-size: 145px;
+    color: #55a532;
+}
