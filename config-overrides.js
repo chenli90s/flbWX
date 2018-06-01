@@ -91,10 +91,19 @@ module.exports = function override(config, env) {
         }
     );
 
-
+    // file-modules
+    config.module.rules[1].oneOf.unshift(
+        {
+            test: /\.svg$/,
+            use:[
+                require.resolve('url-loader')
+            ]
+        }
+    );
     // file-loader exclude
     let l = getLoader(config.module.rules, fileLoaderMatcher);
     l.exclude.push(/\.less$/);
-
+    // console.log(config)
+    // config.output.publicPath = '/static/';
     return config;
 };

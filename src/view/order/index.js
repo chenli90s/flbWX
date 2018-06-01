@@ -133,7 +133,7 @@ class Order extends React.Component{
                     mode="light"
                     icon={<Icon type="left"/>}
                     onLeftClick={() => {
-                        this.props.history.push('/2')
+                        this.props.history.push('/static/2')
                     }}
                 >我的订单</NavBar>
                 <WhiteSpace/>

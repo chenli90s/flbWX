@@ -7,6 +7,7 @@ import {
     Picker, Switch, Button, WingBlank
 } from 'antd-mobile'
 import './style.css'
+import config from '../../utils/config'
 
 const data = {
     '1': {
@@ -122,6 +123,18 @@ class Form extends React.Component {
         const {type} = this.props.match.params;
         const vals = data[type];
         this.setState({type: [vals.type[0][0].value]})
+    };
+
+    componentDidMount = ()=>{
+        let search = this.props.location.search;
+        if(!search){
+            // window.location = config.getCode(window.location.host+window.location.pathname)
+        }else {
+            let code = config.getQueryString('code');
+            if(code){
+
+            }
+        }
     };
 
     submit = () => {

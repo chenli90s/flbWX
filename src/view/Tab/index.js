@@ -37,6 +37,7 @@ class Tabs extends React.Component{
     }
 
     render() {
+        console.log('1')
         return (
             <div style={{ position: 'fixed', height: '100%', width: '100%', top: 0 } }>
                 <TabBar

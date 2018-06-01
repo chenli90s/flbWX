@@ -54,7 +54,7 @@ class Home extends React.Component{
     select =(index)=>{
         // console.log(index)
         const {history} = this.props;
-        history.push(`/form/${index.type}`)
+        history.push(`/static/form/${index.type}`)
     };
 
 

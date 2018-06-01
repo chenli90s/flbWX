@@ -5,6 +5,7 @@
   "dependencies": {
     "antd-mobile": "^2.0.0",
     "axios": "^0.18.0",
+    "jshashes": "^1.0.7",
     "mobx": "^4.3.0",
     "mobx-react": "^5.1.2",
     "react": "^15.6.1",
@@ -27,6 +28,7 @@
     "less-loader": "^4.0.5",
     "react-app-rewire-svg-react-loader": "github:codebandits/react-app-rewire-svg-react-loader",
     "react-app-rewired": "^1.2.9",
-    "resolve-url-loader": "^2.3.0"
+    "resolve-url-loader": "^2.3.0",
+    "url-loader": "^1.0.1"
   }
 }

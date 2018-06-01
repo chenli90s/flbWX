@@ -10,7 +10,7 @@ class Balance extends React.Component{
                     mode="light"
                     icon={<Icon type="left"/>}
                     onLeftClick={() => {
-                        this.props.history.push('/2')
+                        this.props.history.goBack()
                     }}
                 >我的余额</NavBar>
                 <WhiteSpace size="lg" />

@@ -16,13 +16,13 @@ class Routers extends React.Component {
         return (
             <BrowserRouter>
                     <Switch>
-                        <Route path="/form/:type" exact component={Form}/>
-                        <Route path="/user/order" exact component={Order}/>
-                        <Route path="/user/join" exact component={Join}/>
-                        <Route path="/user/balance" exact component={Balance}/>
-                        <Route path="/user/prod" exact component={Prod}/>
-                        <Route path="/:type" exact component={Tabs}/>
-                        <Redirect from={'/'} to={'/1'}/>
+                        <Route path="/static/form/:type" exact component={Form}/>
+                        <Route path="/static/user/order" exact component={Order}/>
+                        <Route path="/static/user/join" exact component={Join}/>
+                        <Route path="/static/user/balance" exact component={Balance}/>
+                        <Route path="/static/user/prod" exact component={Prod}/>
+                        <Route path="/static/:type" exact component={Tabs}/>
+                        <Redirect from={'/static'} to={'/static/1'}/>
                     </Switch>
             </BrowserRouter>
         );

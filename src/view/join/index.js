@@ -21,7 +21,7 @@ class Join extends React.Component {
                     mode="light"
                     icon={<Icon type="left"/>}
                     onLeftClick={() => {
-                        this.props.history.push('/2')
+                        this.props.history.push('/static/2')
                     }}
                 >加入我们</NavBar>
                 <List>
