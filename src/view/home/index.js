@@ -1,5 +1,5 @@
 import React from 'react';
-import {Carousel, Grid} from 'antd-mobile'
+import {Carousel, Grid, Toast} from 'antd-mobile'
 import Images from '../../asset/img/timg.jpg'
 import './style.css'
 import Svg1 from '../../asset/icon/1.svg'
@@ -8,6 +8,7 @@ import Svg3 from '../../asset/icon/3.svg'
 import Svg4 from '../../asset/icon/4.svg'
 import Svg5 from '../../asset/icon/5.svg'
 import Svg6 from '../../asset/icon/6.svg'
+import config from "../../utils/config";
 
 const datas = [
     {
@@ -47,15 +48,29 @@ class Home extends React.Component{
         super();
         this.state = {
             data: ['1', '2', '3'],
-            imgHeight: 400,
+            imgHeight: 150,
         };
     }
 
     select =(index)=>{
-        // console.log(index)
+        console.log(index)
         const {history} = this.props;
-        history.push(`/static/form/${index.type}`)
+        if(index.type==1){
+            history.push(`/static/form/${index.type}`)
+        }else {
+            Toast.info('此功能暂未开放')
+        }
+
     };
+
+    // componentWillMount = async ()=>{
+    //     await config.user.checkOpenid(this.props);
+    //     let resp = await config.http.get('/per_info', {openid: config.user.openId});
+    //     // this.setState({role: resp.role})
+    //     if(resp.role==2){
+    //         this.props.history.push('/static/2')
+    //     }
+    // };
 
 
     render(){

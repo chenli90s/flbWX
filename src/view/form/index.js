@@ -4,10 +4,12 @@ import {
     Icon, List,
     InputItem, DatePicker,
     WhiteSpace, TextareaItem,
-    Picker, Switch, Button, WingBlank
+    Picker, Switch, Button, WingBlank,
+    Toast,
 } from 'antd-mobile'
 import './style.css'
 import config from '../../utils/config'
+
 
 const data = {
     '1': {
@@ -119,26 +121,48 @@ class Form extends React.Component {
         isGive: false
     };
 
-    componentWillMount = ()=>{
+    openId = '';
+
+    componentWillMount = () => {
         const {type} = this.props.match.params;
         const vals = data[type];
         this.setState({type: [vals.type[0][0].value]})
     };
 
-    componentDidMount = ()=>{
-        let search = this.props.location.search;
-        if(!search){
-            // window.location = config.getCode(window.location.host+window.location.pathname)
-        }else {
-            let code = config.getQueryString('code');
-            if(code){
-
-            }
-        }
+    componentDidMount = async () => {
+        config.user.checkOpenid(this.props);
     };
 
-    submit = () => {
-        console.log(this.state)
+    submit = async () => {
+        let resp = await config.http.get('/per_info', {openid: config.user.openId});
+        // this.setState({role: resp.role})
+        if(resp.role==3||resp.role==2){
+            Toast.info('你已是管理员， 无法提交')
+        }
+        console.log(this.state);
+        let params = {
+            weight: this.state.weight,
+            something: this.state.type[0],
+            address: this.state.addrDe,
+            phone: this.state.phone.split(' ').join(''),
+            openid: config.user.openId,
+            smtime: config.dateFormat(this.state.date),
+            name: this.state.concat
+        };
+        if(this.state.isGive){
+            params.types = 1
+        }
+        config.http.get('/place_order', params)
+            .then(resp => {
+                if (resp.status == 200) {
+                    //跳转
+                    this.props.history.push('/static/user/order')
+                } else {
+                    Toast.info('网络链接错误， 稍后再试')
+                }
+            }).catch(err => {
+            Toast.info('网络链接错误， 稍后再试')
+        })
     };
 
     render() {
@@ -150,7 +174,7 @@ class Form extends React.Component {
                     mode="light"
                     icon={<Icon type="left"/>}
                     onLeftClick={() => {
-                        this.props.history.goBack()
+                        this.props.history.push('/static/1')
                     }}
                 >{vals.title}</NavBar>
                 <WhiteSpace/>
@@ -176,21 +200,21 @@ class Form extends React.Component {
                         联系人
                     </InputItem>
                     <InputItem
-                        type={'text'}
+                        type={'phone'}
                         value={this.state.phone}
                         onChange={value => this.setState({phone: value})}
                         placeholder="请输入联系人电话"
                     >
                         联系电话
                     </InputItem>
-                    <InputItem
-                        type={'text'}
-                        value={this.state.addr}
-                        onChange={value => this.setState({addr: value})}
-                        placeholder="请输入联系人地址"
-                    >
-                        取货地点
-                    </InputItem>
+                    {/*<InputItem*/}
+                    {/*type={'text'}*/}
+                    {/*value={this.state.addr}*/}
+                    {/*onChange={value => this.setState({addr: value})}*/}
+                    {/*placeholder="请输入联系人地址"*/}
+                    {/*>*/}
+                    {/*取货地点*/}
+                    {/*</InputItem>*/}
                     <TextareaItem
                         title="详细地址"
                         placeholder=""
@@ -204,8 +228,8 @@ class Form extends React.Component {
                         type={'number'}
                         value={this.state.weight}
                         onChange={value => this.setState({weight: value})}
-                        placeholder="请输入联系人地址"
-                        extra={'公斤'}
+                        placeholder="请输入重量"
+                        extra={'斤'}
                     >
                         预估重量
                     </InputItem>

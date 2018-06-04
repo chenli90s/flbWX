@@ -1,44 +1,17 @@
 import React from 'react'
-import { SegmentedControl, WingBlank, NavBar, WhiteSpace, Icon, ListView } from 'antd-mobile';
+import {SegmentedControl, WingBlank, NavBar, WhiteSpace, Icon, ListView, Button} from 'antd-mobile';
+import config from '../../utils/config'
 
 
-const data = [
-    {
-        img: 'https://zos.alipayobjects.com/rmsportal/dKbkpPXKfvZzWCM.png',
-        title: 'Meet hotel',
-        des: '不是所有的兼职汪都需要风吹日晒',
-    },
-    {
-        img: 'https://zos.alipayobjects.com/rmsportal/XmwCzSeJiqpkuMB.png',
-        title: 'McDonald\'s invites you',
-        des: '不是所有的兼职汪都需要风吹日晒',
-    },
-    {
-        img: 'https://zos.alipayobjects.com/rmsportal/hfVtzEhPzTUewPm.png',
-        title: 'Eat the week',
-        des: '不是所有的兼职汪都需要风吹日晒',
-    },
-];
-const NUM_ROWS = 20;
-let pageIndex = 0;
-
-function genData(pIndex = 0) {
-    const dataBlob = {};
-    for (let i = 0; i < NUM_ROWS; i++) {
-        const ii = (pIndex * NUM_ROWS) + i;
-        dataBlob[`${ii}`] = `row - ${ii}`;
-    }
-    // console.log(dataBlob)
-    return dataBlob;
-}
-
-class Order extends React.Component{
+class Order extends React.Component {
 
     onChange = (e) => {
         console.log(`selectedIndex:${e.nativeEvent.selectedSegmentIndex}`);
+        this.setState({index: e.nativeEvent.selectedSegmentIndex})
     };
     onValueChange = (value) => {
         console.log(value);
+        this.setList(value)
     };
 
     constructor(props) {
@@ -50,45 +23,133 @@ class Order extends React.Component{
         this.state = {
             dataSource,
             isLoading: true,
+            index: 0,
         };
+
+        this.data = {
+            '等接单': [],
+            '上门中': [],
+            '已完成': []
+        }
     }
 
-    componentDidMount() {
-        // you can scroll to the specified position
-        // setTimeout(() => this.lv.scrollTo(0, 120), 800);
+    setList = (types) => {
+        const data = this.data[types];
+        const dataBlob = {};
+        data.forEach((value, index) => {
+            dataBlob[index] = value;
+        });
+        this.setState({
+            dataSource: this.state.dataSource.cloneWithRows(dataBlob),
+            isLoading: false,
+        });
+    };
 
-        // simulate initial Ajax
-        setTimeout(() => {
-            this.rData = genData();
+    componentDidMount = async () => {
+        await config.user.checkOpenid(this.props);
+        // setTimeout(() => {
+        //     this.rData = genData();
+        //     this.setState({
+        //         dataSource: this.state.dataSource.cloneWithRows(this.rData),
+        //         isLoading: false,
+        //     });
+        // }, 600);
+        let resp = await config.http.get('/my_order', {openid: config.user.openId});
+        console.log(resp);
+        if(resp.status == 600){
             this.setState({
-                dataSource: this.state.dataSource.cloneWithRows(this.rData),
+                dataSource: this.state.dataSource.cloneWithRows({}),
                 isLoading: false,
             });
-        }, 600);
-    }
-
-    onEndReached = (event) => {
-        // load new data
-        // hasMore: from backend data, indicates whether it is the last page, here is false
-        if (this.state.isLoading && !this.state.hasMore) {
             return;
         }
-        console.log('reach end', event);
-        this.setState({ isLoading: true });
-        setTimeout(() => {
-            this.rData = { ...this.rData, ...genData(++pageIndex) };
-            console.log(this.rData)
+        if (resp.res.length > 0) {
+
+            resp.res.forEach((value) => {
+
+                this.data[value.status].push(value)
+            });
+            this.setList('等接单');
+        }else {
             this.setState({
-                dataSource: this.state.dataSource.cloneWithRows(this.rData),
+                dataSource: this.state.dataSource.cloneWithRows({}),
                 isLoading: false,
             });
-        }, 1000);
-    }
+        }
+    };
+
+    // onEndReached = (event) => {
+    //     // load new data
+    //     // hasMore: from backend data, indicates whether it is the last page, here is false
+    //     if (this.state.isLoading && !this.state.hasMore) {
+    //         return;
+    //     }
+    //     console.log('reach end', event);
+    //     this.setState({isLoading: true});
+    //     setTimeout(() => {
+    //         this.rData = {...this.rData, ...genData(++pageIndex)};
+    //         console.log(this.rData)
+    //         this.setState({
+    //             dataSource: this.state.dataSource.cloneWithRows(this.rData),
+    //             isLoading: false,
+    //         });
+    //     }, 1000);
+    // }
+
+    filterButton = (types, id) => {
+        if (types == '等接单') {
+            return (
+                <div style={{display: 'flex', alignItems: 'center'}}>
+                    <Button type={'primary'} inline size={'small'} onClick={()=>{this.delOrder(id)}}>取消订单</Button>
+                </div>)
+        }
+        // if(types == '已完成') {
+        //     return (
+        //         <div style={{display: 'flex', alignItems: 'center'}}>
+        //             <Button type={'primary'} inline size={'small'} onClick={()=>{this.delOrder(id)}}>删除订单</Button>
+        //         </div>
+        //     )
+        // }
+    };
+
+    delOrder = async (order_id)=>{
+        let resp = await config.http.get('/del_corder', {order_id})
+        if(resp.status === 200){
+            this.data = {
+                '等接单': [],
+                '上门中': [],
+                '已完成': []
+            }
+            resp = await config.http.get('/my_order', {openid: config.user.openId});
+            console.log(resp);
+            if(resp.status == 600){
+                this.setState({
+                    dataSource: this.state.dataSource.cloneWithRows({}),
+                    isLoading: false,
+                });
+                return;
+            }
+            if (resp.res.length > 0) {
+                resp.res.forEach((value) => {
+                    this.data[value.status].push(value)
+                });
+                if(this.state.index === 0){
+                    this.setList('等接单');
+                }else {
+                    this.setList('已完成');
+                }
+            }
+        }else {
+            this.setState({
+                dataSource: this.state.dataSource.cloneWithRows({}),
+                isLoading: false,
+            });
+            return;
+        }
+    };
 
 
-
-
-    render(){
+    render() {
         const separator = (sectionID, rowID) => (
             <div
                 key={`${sectionID}-${rowID}`}
@@ -100,34 +161,20 @@ class Order extends React.Component{
                 }}
             />
         );
-        let index = data.length - 1;
         const row = (rowData, sectionID, rowID) => {
-            if (index < 0) {
-                index = data.length - 1;
-            }
-            const obj = data[index--];
-            console.log(rowData)
             return (
-                <div key={rowID} style={{ padding: '0 15px' }}>
-                    <div
-                        style={{
-                            lineHeight: '25px',
-                            color: '#888',
-                            fontSize: 12,
-                            borderBottom: '1px solid #F6F6F6',
-                        }}
-                    >{obj.title}</div>
-                    <div style={{ display: '-webkit-box', display: 'flex', padding: '15px 0' }}>
-                        <img style={{ height: '64px', marginRight: '15px' }} src={obj.img} alt="" />
-                        <div style={{ lineHeight: 1 }}>
-                            <div style={{ marginBottom: '8px', fontWeight: 'bold' }}>{obj.des}</div>
-                            <div><span style={{ fontSize: '30px', color: '#FF6E27' }}>{rowID}</span>¥</div>
-                        </div>
+                <div key={rowID} style={{padding: '0 15px', display: 'flex', justifyContent: 'space-between'}}>
+                    <div style={{lineHeight: '27px', fontSize: 16}}>
+                        <p>状态：{rowData.status}</p>
+                        <p>电话：{rowData.phone}</p>
+                        <p>地址：{rowData.address}</p>
+                        <p>上门时间：{rowData.sm_time}</p>
                     </div>
+                    {this.filterButton(rowData.status, rowData.id)}
                 </div>
             );
         };
-        return(
+        return (
             <div className="order">
                 <NavBar
                     mode="light"
@@ -140,7 +187,8 @@ class Order extends React.Component{
                 <WhiteSpace/>
                 <WingBlank size="lg" className="sc-example">
                     <SegmentedControl
-                        values={['全部订单', '待确认', '已完成']}
+                        values={['等接单', '上门中', '已完成']}
+                        selectedIndex={this.state.index}
                         onChange={this.onChange}
                         onValueChange={this.onValueChange}
                     />
@@ -150,18 +198,18 @@ class Order extends React.Component{
                     ref={el => this.lv = el}
                     dataSource={this.state.dataSource}
                     renderHeader={() => <span>我的订单</span>}
-                    renderFooter={() => (<div style={{ padding: 30, textAlign: 'center' }}>
-                        {this.state.isLoading ? 'Loading...' : 'Loaded'}
+                    renderFooter={() => (<div style={{padding: 30, textAlign: 'center'}}>
+                        {this.state.isLoading ? '加载中...' : '加载完成'}
                     </div>)}
                     renderRow={row}
                     renderSeparator={separator}
                     className="am-list"
-                    pageSize={4}
+                    // pageSize={4}
                     useBodyScroll
-                    onScroll={() => { console.log('scroll'); }}
-                    scrollRenderAheadDistance={500}
-                    onEndReached={this.onEndReached}
-                    onEndReachedThreshold={10}
+                    // onScroll={() => { console.log('scroll'); }}
+                    // scrollRenderAheadDistance={500}
+                    // onEndReached={this.onEndReached}
+                    // onEndReachedThreshold={10}
                 />
             </div>
         )

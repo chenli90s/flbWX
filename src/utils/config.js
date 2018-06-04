@@ -11,15 +11,90 @@ import http from './http'
 // });
 
 
-const getCode = (url)=>{
-    return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx97f3b4eb3693a30e&redirect_uri=${encodeURI(url)}&response_type=code&scope=snsapi_base#wechat_redirect`
+const getCode = (url, flag) => {
+    if (flag) {
+        return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx97f3b4eb3693a30e&redirect_uri=${encodeURIComponent(url)}&response_type=code&scope=snsapi_userinfo#wechat_redirect`
+    }else {
+        return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx97f3b4eb3693a30e&redirect_uri=${encodeURIComponent(url)}&response_type=code&scope=snsapi_base#wechat_redirect`
+    }
+
+
 };
 
 function getQueryString(name) {
-        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
-        var r = window.location.search.substr(1).match(reg);
-        if (r != null) return decodeURI(r[2]);
-        return null;
-    }
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    var r = window.location.search.substr(1).match(reg);
+    if (r != null) return decodeURI(r[2]);
+    return null;
+}
 
-export default {getCode, getQueryString}
+const dateFormat = (date=new Date())=>{
+    let fmt = 'yyyy-MM-dd hh:mm';
+    var o = {
+        "M+": date.getMonth() + 1, //月份
+        "d+": date.getDate(), //日
+        "h+": date.getHours(), //小时
+        "m+": date.getMinutes(), //分
+        "s+": date.getSeconds(), //秒
+        "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+        "S": date.getMilliseconds() //毫秒
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+        // eslint-disable-next-line
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt
+};
+
+class User{
+
+    openId = '';
+
+    userInfo = '';
+
+    getOpenid = async (props)=>{
+        this.props = props;
+        let search = this.props.location.search;
+        if (!search) {
+            window.location = getCode(window.location.href)
+        } else {
+            let code = getQueryString('code');
+            if (code) {
+                let resp = await http.get('https://www.hlfeilibao.com/gong_openid', {code});
+                this.openId = resp.status;
+                // resp = await config.http.get('/', {openid:resp.openid});
+                console.log(resp)
+            }
+        }
+    };
+
+    getOpenInfo = async (props)=>{
+        this.props = props;
+        if(this.userInfo){
+            return this.userInfo
+        }
+        let search = this.props.location.search;
+        if (!search) {
+            window.location = getCode(window.location.href, true)
+        } else {
+            let code = getQueryString('code');
+            if (code) {
+                let resp = await http.get('https://www.hlfeilibao.com/getUserInfo', {code});
+                if(resp.status){
+                    this.openId = resp.data.openid;
+                    this.userInfo = resp.data;
+                    return resp.data
+                }
+            }
+        }
+    };
+
+
+    checkOpenid = async (props)=>{
+        this.openId || await this.getOpenid(props)
+    }
+}
+
+const user = new User();
+
+export default {getCode, getQueryString, http, dateFormat, user}

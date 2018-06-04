@@ -2,7 +2,7 @@ import axios from 'axios';
 // import userStore from '../stores/userStore';
 
 // const baseURL = 'http://10.70.1.206:8000/api/';
-const baseURL = 'http://10.9.70.87/api/';
+const baseURL = 'https://www.hlfeilibao.com';
 axios.defaults.withCredentials = true;
 axios.interceptors.request.use(config => config);
 axios.interceptors.response.use(

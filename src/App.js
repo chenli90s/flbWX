@@ -1,7 +1,7 @@
 import React from 'react';
 import Routers from './router';
 import './asset/css/public.css';
-import Hashes from 'jshashes'
+// import Hashes from 'jshashes'
 
 // const SHA1 = new Hashes.SHA1
 
