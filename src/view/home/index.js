@@ -1,6 +1,9 @@
 import React from 'react';
 import {Carousel, Grid, Toast} from 'antd-mobile'
-import Images from '../../asset/img/timg.jpg'
+// import Images from '../../asset/img/timg.jpg'
+import One from '../../asset/img/1.jpg'
+import Two from '../../asset/img/2.jpg'
+import Three from '../../asset/img/3.jpg'
 import './style.css'
 import Svg1 from '../../asset/icon/1.svg'
 import Svg2 from '../../asset/icon/2.svg'
@@ -50,6 +53,12 @@ class Home extends React.Component{
             data: ['1', '2', '3'],
             imgHeight: 150,
         };
+        this.imgs = {
+            '1': One,
+            '2': Two,
+            '3': Three,
+
+        }
     }
 
     select =(index)=>{
@@ -89,7 +98,7 @@ class Home extends React.Component{
                             style={{ display: 'inline-block', width: '100%', height: this.state.imgHeight }}
                         >
                             <img
-                                src={Images}
+                                src={this.imgs[val]}
                                 alt=""
                                 style={{ width: '100%', verticalAlign: 'top' }}
                                 onLoad={() => {
