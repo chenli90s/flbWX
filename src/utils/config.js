@@ -1,6 +1,57 @@
 import Hash from 'jshashes'
 import http from './http'
 
+const Wx = require('weixin-js-sdk');
+const SHA1 = new Hash.SHA1;
+
+
+class WX {
+
+    ticket = '';
+
+    wx = '';
+
+    wraperConfig = () => {
+        let timestamp = Date.parse(new Date());
+        let nonceStr = 'fPE4DxkXGEs8VMCPG';
+        let url = window.location.href;
+        let strp = `jsapi_ticket=${this.ticket}&noncestr=${nonceStr}&timestamp=${timestamp}&url=${url}`
+        let signature = SHA1.hex(strp);
+        return {
+            debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+            appId: 'wx97f3b4eb3693a30e', // 必填，公众号的唯一标识
+            timestamp: timestamp, // 必填，生成签名的时间戳
+            nonceStr: nonceStr, // 必填，生成签名的随机串
+            signature: signature,// 必填，签名
+            jsApiList: ['chooseImage', 'uploadImage', 'previewImage'] // 必填，需要使用的JS接口列表
+        }
+    };
+
+    getWx = async (props) => {
+        // console.log(this.wraperConfig());
+        if (this.ticket) {
+            Wx.config(this.wraperConfig());
+            this.wx = Wx
+        } else {
+            await this.getTicket(props);
+            Wx.config(this.wraperConfig());
+            this.wx = Wx
+        }
+    };
+
+    getTicket = async (props) => {
+        this.props = props;
+        if (this.ticket) {
+            return this.ticket
+        }
+        let resp = await http.get('https://www.hlfeilibao.com/get_ticket');
+        if (resp.status) {
+            this.ticket = resp.data.ticket
+        }
+    };
+}
+
+
 // wx.config({
 //     debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
 //     appId: 'wx97f3b4eb3693a30e', // 必填，公众号的唯一标识
@@ -14,7 +65,7 @@ import http from './http'
 const getCode = (url, flag) => {
     if (flag) {
         return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx97f3b4eb3693a30e&redirect_uri=${encodeURIComponent(url)}&response_type=code&scope=snsapi_userinfo#wechat_redirect`
-    }else {
+    } else {
         return `https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx97f3b4eb3693a30e&redirect_uri=${encodeURIComponent(url)}&response_type=code&scope=snsapi_base#wechat_redirect`
     }
 
@@ -28,7 +79,7 @@ function getQueryString(name) {
     return null;
 }
 
-const dateFormat = (date=new Date())=>{
+const dateFormat = (date = new Date()) => {
     let fmt = 'yyyy-MM-dd hh:mm';
     var o = {
         "M+": date.getMonth() + 1, //月份
@@ -46,13 +97,15 @@ const dateFormat = (date=new Date())=>{
     return fmt
 };
 
-class User{
+class User {
 
     openId = '';
 
     userInfo = '';
 
-    getOpenid = async (props)=>{
+    access_token = '';
+
+    getOpenid = async (props) => {
         this.props = props;
         let search = this.props.location.search;
         if (!search) {
@@ -68,9 +121,9 @@ class User{
         }
     };
 
-    getOpenInfo = async (props)=>{
+    getOpenInfo = async (props) => {
         this.props = props;
-        if(this.userInfo){
+        if (this.userInfo) {
             return this.userInfo
         }
         let search = this.props.location.search;
@@ -80,9 +133,10 @@ class User{
             let code = getQueryString('code');
             if (code) {
                 let resp = await http.get('https://www.hlfeilibao.com/getUserInfo', {code});
-                if(resp.status){
+                if (resp.status) {
                     this.openId = resp.data.openid;
                     this.userInfo = resp.data;
+                    this.access_token = resp.access_token;
                     return resp.data
                 }
             }
@@ -90,11 +144,12 @@ class User{
     };
 
 
-    checkOpenid = async (props)=>{
+    checkOpenid = async (props) => {
         this.openId || await this.getOpenid(props)
     }
 }
 
 const user = new User();
+const wx = new WX();
 
-export default {getCode, getQueryString, http, dateFormat, user}
+export default {getCode, getQueryString, http, dateFormat, user, wx}

@@ -71,6 +71,12 @@ class User extends React.Component{
                     <List.Item arrow="horizontal" onClick={()=>{
                         this.props.history.push('/static/user/manage')
                     }}>管理</List.Item>
+                    <List.Item arrow="horizontal" onClick={()=>{
+                        this.props.history.push('/static/user/mgprod')
+                    }}>商品管理</List.Item>
+                    {/*<List.Item arrow="horizontal" onClick={()=>{*/}
+                        {/*this.props.history.push('/static/user/manage')*/}
+                    {/*}}>商品添加</List.Item>*/}
                 </List>
             )
         }

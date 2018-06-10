@@ -16,7 +16,8 @@ import Confirm from '../view/confirm'
 import HistoryOrder from '../view/historyOrder'
 import Manage from '../view/manage'
 import ManageOrder from '../view/manageOrder'
-
+import MgProd from '../view/mgProd'
+import ProdEdit from '../view/prodedit'
 
 class Routers extends React.Component {
 
@@ -29,6 +30,8 @@ class Routers extends React.Component {
                         <Route path="/static/user/submit" exact component={Submit}/>
                         <Route path="/static/user/confirm" exact component={Confirm}/>
                         <Route path="/static/user/order" exact component={Order}/>
+                        <Route path="/static/user/mgprod" exact component={MgProd}/>
+                        <Route path="/static/user/prodedit" exact component={ProdEdit}/>
                         <Route path="/static/user/manage" exact component={Manage}/>
                         <Route path="/static/user/manageOrder" exact component={ManageOrder}/>
                         <Route path="/static/user/historyorder" exact component={HistoryOrder}/>

@@ -33,7 +33,7 @@ const datas = [
         type: '4'
 
     },{
-        text: '废家店',
+        text: '废家电',
         icon: Svg5,
         type: '5'
 
