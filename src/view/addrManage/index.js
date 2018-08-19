@@ -1,12 +1,13 @@
 import React from 'react'
 import {WingBlank, NavBar, WhiteSpace, Icon, ListView, Button, Toast} from 'antd-mobile';
 import config from '../../utils/config'
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
+
 const dataSource = new ListView.DataSource({
     rowHasChanged: (row1, row2) => row1 !== row2,
 });
 
-class MgProd extends React.Component {
+class MgAddr extends React.Component {
 
     state = {
         dataSource,
@@ -14,9 +15,16 @@ class MgProd extends React.Component {
     };
 
     componentDidMount = async () => {
-        // await config.wx.getWx(this.props);
-        let resp = await config.http.get('/goods_list');
-        // console.log(resp);
+        await config.user.checkOpenid(this.props);
+        if (!config.user.openId) {
+            return
+        }
+        console.log(config.user.openId);
+        let resp = await config.http.get('/show_addr?unionid=' + config.user.openId,);
+        if (resp.status == 600) {
+            this.setState({isLoading: false});
+            return
+        }
         if (resp.res.length > 0) {
             const dataBlob = {};
             resp.res.forEach((value, index) => {
@@ -30,12 +38,12 @@ class MgProd extends React.Component {
 
     };
 
-    edit = (data)=>{
-        this.props.history.push({'pathname': '/static/user/prodedit', state:data})
+    edit = (data) => {
+        this.props.history.push({'pathname': '/static/user/prodedit', state: data})
     };
 
-    delOrder = async (id)=>{
-        await config.http.get('/del_goods', {id})
+    delOrder = async (id) => {
+        await config.http.get('/del_goods', {id});
         let resp = await config.http.get('/goods_list');
         // console.log(resp);
         if (resp.res.length > 0) {
@@ -51,6 +59,7 @@ class MgProd extends React.Component {
     };
 
     render() {
+        const types = this.props.location.state;
         const separator = (sectionID, rowID) => (
             <div
                 key={`${sectionID}-${rowID}`}
@@ -64,19 +73,32 @@ class MgProd extends React.Component {
         );
         const row = (rowData, sectionID, rowID) => {
             return (
-                <div key={rowID} style={{padding: '0 15px', display: 'flex', justifyContent: 'space-between'}}>
-                    <div style={{lineHeight: '27px', fontSize: 16}}>
-                        <img src={rowData.url} alt="" style={{height:90, width:90}}/>
-                    </div>
-                    <div style={{width: '100%', marginLeft: '10px', marginTop: '10px'}}>
-                        <p style={{fontSize: '20px'}}>{rowData.goods_name}</p>
-                        <p>积分：{rowData.need_int}</p>
-                        <p>价格：{rowData.jia}</p>
-                    </div>
-                    <div style={{margin: 'auto'}}>
-                        <Button type={'primary'} inline size={'small'} onClick={()=>{this.edit(rowData)}}>修改</Button>
-                        <div style={{width: 30}}/>
-                        <Button type={'primary'} inline size={'small'} onClick={()=>{this.delOrder(rowData.id)}}>删除</Button>
+                <div key={rowID} style={{padding: '0 15px', fontSize: '16px'}}>
+                    <p>联系人: {rowData.name}</p>
+                    <p>联系电话: {rowData.phone}</p>
+                    <div style={{wordBreak: 'break-all'}}>地址: {rowData.addr}</div>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-evenly',
+                        margin: '7px auto'
+                    }}>
+                        <Button type={'primary'} inline size={'small'} onClick={() => {
+                            // if(!types){
+                            //     Toast.fail('err no data');
+                            //     return
+                            // }
+                            let paths = '/static/form/1';
+                            this.props.history.push({
+                                pathname: paths,
+                                state: {rowData, type: types}
+                            })
+                        }}>选择</Button>
+                        <Button type={'primary'} inline size={'small'} onClick={() => {
+                            this.props.history.push({
+                                pathname: '/static/user/editAddr',
+                                state: {rowData, type: types}
+                            })
+                        }}>编辑</Button>
                     </div>
                 </div>
             );
@@ -88,10 +110,10 @@ class MgProd extends React.Component {
                     mode="light"
                     icon={<Icon type="left"/>}
                     onLeftClick={() => {
-                        this.props.history.push('/static/2')
+                        this.props.history.goBack()
                     }}
-                    rightContent={[<Link to={'/static/user/prodedit'}>添加</Link>]}
-                >商品管理</NavBar>
+                    rightContent={[<Link to={'/static/user/editAddr'}>添加地址</Link>]}
+                >地址管理</NavBar>
                 <WhiteSpace/>
                 <ListView
                     ref={el => this.lv = el}
@@ -115,4 +137,4 @@ class MgProd extends React.Component {
     }
 }
 
-export default MgProd
+export default MgAddr

@@ -72,14 +72,14 @@ class Home extends React.Component{
 
     };
 
-    // componentWillMount = async ()=>{
-    //     await config.user.checkOpenid(this.props);
-    //     let resp = await config.http.get('/per_info', {openid: config.user.openId});
-    //     // this.setState({role: resp.role})
-    //     if(resp.role==2){
-    //         this.props.history.push('/static/2')
-    //     }
-    // };
+    componentWillMount = async ()=>{
+        await config.user.getOpenInfo(this.props);
+        // let resp = await config.http.get('/per_info', {openid: config.user.openId});
+        // // this.setState({role: resp.role})
+        // if(resp.role==2){
+        //     this.props.history.push('/static/2')
+        // }
+    };
 
 
     render(){

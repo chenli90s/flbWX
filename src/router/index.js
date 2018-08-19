@@ -1,6 +1,6 @@
 import React from 'react';
 import {Route, BrowserRouter, Switch, Redirect} from 'react-router-dom';
-import Tabs from '../view/Tab'
+// import Tabs from '../view/Tab'
 import User from '../view/user'
 import Home from '../view/home'
 import Form from '../view/form'
@@ -18,6 +18,9 @@ import Manage from '../view/manage'
 import ManageOrder from '../view/manageOrder'
 import MgProd from '../view/mgProd'
 import ProdEdit from '../view/prodedit'
+import SupHistory from '../view/superOrder'
+import MgAddr from '../view/addrManage'
+import EditAddr from '../view/editAddr'
 
 class Routers extends React.Component {
 
@@ -41,6 +44,9 @@ class Routers extends React.Component {
                         <Route path="/static/user/join" exact component={Join}/>
                         <Route path="/static/user/balance" exact component={Balance}/>
                         <Route path="/static/user/prod" exact component={Prod}/>
+                        <Route path="/static/user/supOrder" exact component={SupHistory}/>
+                        <Route path="/static/user/myAddr" exact component={MgAddr}/>
+                        <Route path="/static/user/editAddr" exact component={EditAddr}/>
                         <Route path="/static/1" exact component={Home}/>
                         <Route path="/static/2" exact component={User}/>
                         <Redirect from={'/static'} to={'/static/1'}/>

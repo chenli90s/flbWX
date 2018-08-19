@@ -110,16 +110,29 @@ const data = {
 };
 
 class Form extends React.Component {
-    state = {
-        date: '',
-        concat: '',
-        phone: '',
-        addr: '',
-        addrDe: '',
-        weight: '',
-        type: '',
-        isGive: false
-    };
+
+    constructor(props) {
+        super(props);
+        let data = props.location.state;
+        this.state = {
+            date: '',
+            concat: '',
+            phone: '',
+            addr: '',
+            addrDe: '',
+            weight: '',
+            type: '',
+            isGive: false
+        };
+        if(data){
+            // console.log(data)
+            this.state.concat = data.rowData.name;
+            this.state.phone = data.rowData.phone;
+            this.state.addrDe = data.rowData.addr;
+            this.state.type = data.type;
+        }
+    }
+
 
     openId = '';
 
@@ -134,9 +147,14 @@ class Form extends React.Component {
     };
 
     submit = async () => {
+        let data = this.props.location.state;
+        if(!data){
+            Toast.fail("请编辑地址，否则无法提交！")
+            return
+        }
         let resp = await config.http.get('/per_info', {openid: config.user.openId});
         // this.setState({role: resp.role})
-        if(resp.role==3||resp.role==2){
+        if (resp.role == 3 || resp.role == 2) {
             Toast.info('你已是管理员， 无法提交')
         }
         console.log(this.state);
@@ -149,7 +167,7 @@ class Form extends React.Component {
             smtime: config.dateFormat(this.state.date),
             name: this.state.concat
         };
-        if(this.state.isGive){
+        if (this.state.isGive) {
             params.types = 1
         }
         config.http.get('/place_order', params)
@@ -166,7 +184,8 @@ class Form extends React.Component {
     };
 
     render() {
-        const {type} = this.props.match.params;
+        // console.log(this.props.match.params);
+        const type = this.props.match.params.type;
         const vals = data[type];
         return (
             <div className="form">
@@ -179,6 +198,48 @@ class Form extends React.Component {
                 >{vals.title}</NavBar>
                 <WhiteSpace/>
                 <List>
+
+                    {/*<InputItem*/}
+                    {/*type={'text'}*/}
+                    {/*value={this.state.concat}*/}
+                    {/*onChange={value => this.setState({concat: value})}*/}
+                    {/*placeholder="请输入联系人姓名"*/}
+                    {/*// onExtraClick={(e) => {*/}
+                    {/*//     console.log(e)*/}
+                    {/*// }}*/}
+                    {/*>*/}
+                    {/*联系人*/}
+                    {/*</InputItem>*/}
+                    {/*<InputItem*/}
+                    {/*type={'phone'}*/}
+                    {/*value={this.state.phone}*/}
+                    {/*onChange={value => this.setState({phone: value})}*/}
+                    {/*placeholder="请输入联系人电话"*/}
+                    {/*>*/}
+                    {/*联系电话*/}
+                    {/*</InputItem>*/}
+                    {/*<InputItem*/}
+                    {/*type={'text'}*/}
+                    {/*value={this.state.addr}*/}
+                    {/*onChange={value => this.setState({addr: value})}*/}
+                    {/*placeholder="请输入联系人地址"*/}
+                    {/*>*/}
+                    {/*取货地点*/}
+                    {/*</InputItem>*/}
+                    {/*<InputItem*/}
+                    {/*title="详细地址"*/}
+                    {/*placeholder=""*/}
+                    {/*// data-seed="logId"*/}
+                    {/*// ref={el => this.autoFocusInst = el}*/}
+                    {/*autoHeight*/}
+                    {/*onChange={(e) => this.setState({addrDe: e})}*/}
+                    {/*value={this.state.addrDe}*/}
+                    {/*>详细地址</InputItem>*/}
+                    <List.Item
+                        extra={this.state.addrDe}
+                        arrow={'horizontal'} onClick={() => {
+                        this.props.history.push({pathname: '/static/user/myAddr', state: type})
+                    }}>选取地址</List.Item>
                     <DatePicker
                         value={this.state.date}
                         onChange={date => this.setState({date})}
@@ -188,42 +249,6 @@ class Form extends React.Component {
                     >
                         <List.Item arrow="horizontal">取货时间</List.Item>
                     </DatePicker>
-                    <InputItem
-                        type={'text'}
-                        value={this.state.concat}
-                        onChange={value => this.setState({concat: value})}
-                        placeholder="请输入联系人姓名"
-                        // onExtraClick={(e) => {
-                        //     console.log(e)
-                        // }}
-                    >
-                        联系人
-                    </InputItem>
-                    <InputItem
-                        type={'phone'}
-                        value={this.state.phone}
-                        onChange={value => this.setState({phone: value})}
-                        placeholder="请输入联系人电话"
-                    >
-                        联系电话
-                    </InputItem>
-                    {/*<InputItem*/}
-                    {/*type={'text'}*/}
-                    {/*value={this.state.addr}*/}
-                    {/*onChange={value => this.setState({addr: value})}*/}
-                    {/*placeholder="请输入联系人地址"*/}
-                    {/*>*/}
-                    {/*取货地点*/}
-                    {/*</InputItem>*/}
-                    <TextareaItem
-                        title="详细地址"
-                        placeholder=""
-                        // data-seed="logId"
-                        // ref={el => this.autoFocusInst = el}
-                        autoHeight
-                        onChange={(e) => this.setState({addrDe: e})}
-                        value={this.state.addrDe}
-                    />
                     <InputItem
                         type={'number'}
                         value={this.state.weight}

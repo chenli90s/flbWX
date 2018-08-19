@@ -11,7 +11,7 @@ class User extends React.Component{
         role: 0
     };
 
-    componentDidMount = async ()=>{
+    componentWillMount = async ()=>{
         await config.user.checkOpenid(this.props);
         let resp = await config.http.get('/per_info', {openid: config.user.openId})
         this.setState({role: resp.role})
@@ -74,9 +74,9 @@ class User extends React.Component{
                     <List.Item arrow="horizontal" onClick={()=>{
                         this.props.history.push('/static/user/mgprod')
                     }}>商品管理</List.Item>
-                    {/*<List.Item arrow="horizontal" onClick={()=>{*/}
-                        {/*this.props.history.push('/static/user/manage')*/}
-                    {/*}}>商品添加</List.Item>*/}
+                    <List.Item arrow="horizontal" onClick={()=>{
+                        this.props.history.push('/static/user/supOrder')
+                    }}>历史订单</List.Item>
                 </List>
             )
         }

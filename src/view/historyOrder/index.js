@@ -88,6 +88,8 @@ class HistoryOrder extends React.Component {
                         <p>重量：{rowData.weight}斤</p>
                         {rowData.money&&<p>价格：{rowData.money}元</p>}
                         <p>是否捐赠：{rowData.money?'否':'是'}</p>
+                        <p>完成时间：{rowData.time.split('T').join(' ')}</p>
+                        {/*<p>完成时间：{rowData.ctime}</p>*/}
                     </div>
                     <div style={{display:'flex', alignItems: 'center'}}>
                         {/*<Button type={'primary'} inline size={'small'} onClick={()=>{this.delOrder(rowData.id, rowData.type, rowData.weight)}}>完成接单</Button>*/}

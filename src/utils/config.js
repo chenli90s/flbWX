@@ -23,24 +23,30 @@ class WX {
             timestamp: timestamp, // 必填，生成签名的时间戳
             nonceStr: nonceStr, // 必填，生成签名的随机串
             signature: signature,// 必填，签名
-            jsApiList: ['chooseImage', 'uploadImage', 'previewImage'] // 必填，需要使用的JS接口列表
+            jsApiList: ['getLocation', 'chooseImage', 'uploadImage', 'previewImage',] // 必填，需要使用的JS接口列表
         }
     };
 
-    getWx = async (props) => {
+    getWx = async () => {
         // console.log(this.wraperConfig());
         if (this.ticket) {
             Wx.config(this.wraperConfig());
             this.wx = Wx
         } else {
-            await this.getTicket(props);
+            await this.getTicket();
             Wx.config(this.wraperConfig());
             this.wx = Wx
         }
+        return new Promise(((resolve, reject) => {
+            Wx.ready(function () {
+                console.log('succ________________-')
+                resolve()
+            })
+        }))
     };
 
-    getTicket = async (props) => {
-        this.props = props;
+    getTicket = async () => {
+        // this.props = props;
         if (this.ticket) {
             return this.ticket
         }
@@ -50,7 +56,31 @@ class WX {
         }
     };
 }
+const wx = new WX();
+const getLocation = async () => {
+    await wx.getWx();
+    return new Promise(((resolve, reject) => {
 
+        if (wx.wx) {
+            wx.wx.getLocation({
+                type: 'gcj02', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                success: function (res) {
+                    // var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    // var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    // var speed = res.speed; // 速度，以米/每秒计
+                    // var accuracy = res.accuracy; // 位置精度
+                    console.log(res);
+                    user.location = {w: res.latitude.toString(), j: res.longitude.toString()};
+                    resolve()
+                }
+            });
+        }else {
+            // resolve()
+            console.log('*************************')
+        }
+
+    }))
+};
 
 // wx.config({
 //     debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
@@ -105,20 +135,23 @@ class User {
 
     access_token = '';
 
+    location = '';
+
     getOpenid = async (props) => {
-        this.props = props;
-        let search = this.props.location.search;
-        if (!search) {
-            window.location = getCode(window.location.href)
-        } else {
-            let code = getQueryString('code');
-            if (code) {
-                let resp = await http.get('https://www.hlfeilibao.com/gong_openid', {code});
-                this.openId = resp.status;
-                // resp = await config.http.get('/', {openid:resp.openid});
-                console.log(resp)
-            }
-        }
+        // this.props = props;
+        // let search = this.props.location.search;
+        // if (!search) {
+        //     window.location = getCode(window.location.href)
+        // } else {
+        //     let code = getQueryString('code');
+        //     if (code) {
+        //         let resp = await http.get('https://www.hlfeilibao.com/gong_openid', {code});
+        //         this.openId = resp.status;
+        //         // resp = await config.http.get('/', {openid:resp.openid});
+        //         console.log(resp)
+        //     }
+        // }
+        await this.getOpenInfo(props)
     };
 
     getOpenInfo = async (props) => {
@@ -132,10 +165,13 @@ class User {
         } else {
             let code = getQueryString('code');
             if (code) {
+                await getLocation();
                 let resp = await http.get('https://www.hlfeilibao.com/getUserInfo', {code});
                 if (resp.status) {
-                    this.openId = resp.data.openid;
+                    this.openId = resp.data.unionid;
                     this.userInfo = resp.data;
+                    this.userInfo.openid = resp.data.unionid;
+                    console.log(this.openId);
                     this.access_token = resp.access_token;
                     return resp.data
                 }
@@ -147,9 +183,11 @@ class User {
     checkOpenid = async (props) => {
         this.openId || await this.getOpenid(props)
     }
+
+
 }
 
 const user = new User();
-const wx = new WX();
 
-export default {getCode, getQueryString, http, dateFormat, user, wx}
+
+export default {getCode, getQueryString, http, dateFormat, user, wx, getLocation}

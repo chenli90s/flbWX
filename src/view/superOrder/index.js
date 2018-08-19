@@ -1,12 +1,11 @@
 import React from 'react'
 import {WingBlank, NavBar, WhiteSpace, Icon, ListView, Button, Toast} from 'antd-mobile';
 import config from '../../utils/config'
-import { Link } from 'react-router-dom'
 const dataSource = new ListView.DataSource({
     rowHasChanged: (row1, row2) => row1 !== row2,
 });
 
-class MgProd extends React.Component {
+class HistoryOrder extends React.Component {
 
     state = {
         dataSource,
@@ -14,9 +13,15 @@ class MgProd extends React.Component {
     };
 
     componentDidMount = async () => {
-        // await config.wx.getWx(this.props);
-        let resp = await config.http.get('/goods_list');
+        await config.user.checkOpenid(this.props);
+        let resp = await config.http.get('/super_history', {openid: config.user.openId});
         // console.log(resp);
+        if (resp.status == 600) {
+            this.setState({
+                isLoading: false,
+            });
+            return;
+        }
         if (resp.res.length > 0) {
             const dataBlob = {};
             resp.res.forEach((value, index) => {
@@ -30,27 +35,36 @@ class MgProd extends React.Component {
 
     };
 
-    edit = (data)=>{
-        this.props.history.push({'pathname': '/static/user/prodedit', state:data})
-    };
-
-    delOrder = async (id)=>{
-        await config.http.get('/del_goods', {id})
-        let resp = await config.http.get('/goods_list');
-        // console.log(resp);
-        if (resp.res.length > 0) {
-            const dataBlob = {};
-            resp.res.forEach((value, index) => {
-                dataBlob[index] = value;
-            });
-            this.setState({
-                dataSource: this.state.dataSource.cloneWithRows(dataBlob),
-                isLoading: false,
-            });
+    delOrder = async (id, type, real_weight)=>{
+        if(type){
+            // await config.http.get('/complete_order', {openid:config.user.openId, order_id: id, real_weight, type});
+            // let resp = await config.http.get('/my_order', {openid: config.user.openId});
+            // console.log(resp);
+            // Toast.info('提交成功');
+            // if (resp.status == 600) {
+            //     this.setState({
+            //         isLoading: false,
+            //     });
+            //     return;
+            // }
+            // if (resp.res.length > 0) {
+            //     const dataBlob = {};
+            //     resp.res.forEach((value, index) => {
+            //         dataBlob[index] = value;
+            //     });
+            //     this.setState({
+            //         dataSource: this.state.dataSource.cloneWithRows(dataBlob),
+            //         isLoading: false,
+            //     });
+            // }
+            this.props.history.push({'pathname': '/static/user/confirm', state: {id, type}})
+        }else {
+            this.props.history.push({'pathname': '/static/user/confirm', state: {id}})
         }
     };
 
     render() {
+
         const separator = (sectionID, rowID) => (
             <div
                 key={`${sectionID}-${rowID}`}
@@ -66,17 +80,20 @@ class MgProd extends React.Component {
             return (
                 <div key={rowID} style={{padding: '0 15px', display: 'flex', justifyContent: 'space-between'}}>
                     <div style={{lineHeight: '27px', fontSize: 16}}>
-                        <img src={rowData.url} alt="" style={{height:90, width:90}}/>
+                        {/*<p>状态：{rowData.status}</p>*/}
+                        {/*<p>订单号：{rowData.id}</p>*/}
+                        <p>名字：{rowData.name}</p>
+                        <p>电话：{rowData.phone}</p>
+                        <p>地址：{rowData.address}</p>
+                        <p>重量：{rowData.weight}斤</p>
+                        {rowData.money&&<p>价格：{rowData.money}元</p>}
+                        <p>是否捐赠：{rowData.money?'否':'是'}</p>
+                        <p>完成时间：{rowData.time.split('T').join(' ')}</p>
+                        <p>接单员：{rowData.recv}</p>
+                        {/*<p>完成时间：{rowData.ctime}</p>*/}
                     </div>
-                    <div style={{width: '100%', marginLeft: '10px', marginTop: '10px'}}>
-                        <p style={{fontSize: '20px'}}>{rowData.goods_name}</p>
-                        <p>积分：{rowData.need_int}</p>
-                        <p>价格：{rowData.jia}</p>
-                    </div>
-                    <div style={{margin: 'auto'}}>
-                        <Button type={'primary'} inline size={'small'} onClick={()=>{this.edit(rowData)}}>修改</Button>
-                        <div style={{width: 30}}/>
-                        <Button type={'primary'} inline size={'small'} onClick={()=>{this.delOrder(rowData.id)}}>删除</Button>
+                    <div style={{display:'flex', alignItems: 'center'}}>
+                        {/*<Button type={'primary'} inline size={'small'} onClick={()=>{this.delOrder(rowData.id, rowData.type, rowData.weight)}}>完成接单</Button>*/}
                     </div>
                 </div>
             );
@@ -90,9 +107,8 @@ class MgProd extends React.Component {
                     onLeftClick={() => {
                         this.props.history.push('/static/2')
                     }}
-                    rightContent={[<Link to={'/static/user/prodedit'}>添加</Link>]}
-                >商品管理</NavBar>
-                <WhiteSpace/>
+                >历史订单</NavBar>
+
                 <ListView
                     ref={el => this.lv = el}
                     dataSource={this.state.dataSource}
@@ -115,4 +131,4 @@ class MgProd extends React.Component {
     }
 }
 
-export default MgProd
+export default HistoryOrder
